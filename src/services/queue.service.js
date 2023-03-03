@@ -16,3 +16,7 @@ export async function updateMusic(queue_id,is_played){
 export async function removeMusic(queue_id){
     return axios.delete(`${BACKEND_URL}/api/queues/${queue_id}`)
 }
+
+export async function clearQueue(){
+    return axios.delete(`${BACKEND_URL}/api/queues/clear`)
+}
