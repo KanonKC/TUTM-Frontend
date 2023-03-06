@@ -44,13 +44,20 @@ function App() {
   }
 
   const urlFormatting = (url) => {
-      let url_div = url.split("?v=")
-      if(url_div.length !== 1){
-        let query_div = url_div[1].split("&")
-        return query_div[0]
+      if(url.includes('youtu.be')){
+        let url_div = url.split("youtu.be/")
+        console.log(url_div[1])
+        return url_div[1]
       }
       else{
-        return url_div[0]
+        let url_div = url.split("?v=")
+        if(url_div.length !== 1){
+          let query_div = url_div[1].split("&")
+          return query_div[0]
+        }
+        else{
+          return url_div[0]
+        }
       }
   }
 
@@ -107,7 +114,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Turn Up The Music (BETA)</h1>
+        {/* <h1>Turn Up The Music (BETA)</h1> */} 
         <Row className='my-2'>
           <Col>
             <YouTube
