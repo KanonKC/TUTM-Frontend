@@ -5,6 +5,9 @@ import YouTube from 'react-youtube';
 import { addMusic, clearQueue, getAllQueues } from './services/queue.service';
 import { Button, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
 import Swal from 'sweetalert2';
+import Select  from 'react-select';
+import { searchVideos } from './services/search.service';
+import { isCompositeComponent } from 'react-dom/test-utils';
 
 function App() {
 
@@ -12,6 +15,10 @@ function App() {
   const [Playlist, setPlaylist] = useState([])
   const [playlist_index, setplaylist_index] = useState(0)
   const [loading, setloading] = useState(false)
+
+  const [searchValue,setsearchValue] = useState(null)
+  const [searchResult,setsearchResult] = useState([])
+  const [selectedVideo,setselectedVideo] = useState(null)
 
   const loadQueue = () => {
     getAllQueues().then(response => {
@@ -33,9 +40,28 @@ function App() {
     setplaylist_index((playlist_index + 1) % Playlist.length)
   }
 
+  const handleSearchType = (e) => {
+    setsearchValue(e)
+    searchVideos(e).then(response => {
+      setsearchResult(response.data.result.map(video => ({
+        label: video.title, value: video.id.videoId
+      })))
+    }).catch(err => {
+      setsearchResult([])
+    })
+  }
+
   const addMusicToQueue = (e) => {
     e.preventDefault()
-    let formatted_url = urlFormatting(e.target.url.value)
+    console.log(searchValue,selectedVideo)
+    let formatted_url
+    if(!selectedVideo){
+      formatted_url = urlFormatting(searchValue)
+    } 
+    else{
+      formatted_url = (selectedVideo.value)
+    }   
+    console.log(formatted_url)
     setloading(true)
     addMusic(formatted_url).then(response => {
       setloading(false)
@@ -126,7 +152,8 @@ function App() {
           <Col>
 
             <Form id='request-music-form' className='mb-2 flex' onSubmit={e => addMusicToQueue(e)}>
-              <Input placeholder='Add your music by paste URL here...' id='url'/>
+              {/* <Input placeholder='Add your music by paste URL here...' id='url'/> */}
+              <Select id='url' onInputChange={e => handleSearchType(e)} onChange={e => setselectedVideo(e)} options={searchResult} className='text-sm text-left w-96 text-black'/>
               <Button disabled={loading} color='success' type='submit'>+</Button>
             </Form>
             <ListGroup style={{ height: "315px", overflowY: "scroll" }}>
