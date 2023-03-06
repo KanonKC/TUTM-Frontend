@@ -5,6 +5,12 @@ import YouTube from 'react-youtube';
 import { addMusic, clearQueue, getAllQueues } from './services/queue.service';
 import { Button, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
 import Swal from 'sweetalert2';
+import { MdQueueMusic } from 'react-icons/md';
+import { BiArrowToRight, BiArrowToLeft } from 'react-icons/bi';
+import { GrClearOption } from 'react-icons/gr';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMusic } from '@fortawesome/free-solid-svg-icons';
+
 
 function App() {
 
@@ -21,25 +27,33 @@ function App() {
   }
 
   const handleReady = (e) => {
-    console.log("Ready", playlist_index)
+    // console.log("Ready", playlist_index)
     setTimeout(() => {
-      console.log("Play")
+      // console.log("Play")
       e.target.playVideo();
     }, 1000)
   }
 
   const handleEnd = (e) => {
-    console.log("End", playlist_index)
+    // console.log("End", playlist_index)
     setplaylist_index((playlist_index + 1) % Playlist.length)
   }
 
   const addMusicToQueue = (e) => {
     e.preventDefault()
     let formatted_url = urlFormatting(e.target.url.value)
+    console.log(formatted_url)
     setloading(true)
     addMusic(formatted_url).then(response => {
+      console.log(response.data)
       setloading(false)
       document.getElementById('request-music-form').reset()
+    }).catch(err => {
+      setloading(false)
+      console.log(err)
+      if(err.response.status >= 500){
+        Swal.fire('Exceed Limit!','The request cannot be completed because it has exceeded Youtube API quota. Please try again later.','error')
+      }
     })
   }
 
@@ -113,26 +127,28 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
         {/* <h1>Turn Up The Music (BETA)</h1> */} 
         <Row className='my-2'>
-          <Col>
+          <Col className='flex justify-center'>
             <YouTube
               videoId={Playlist[playlist_index]}
               onReady={e => handleReady(e)}
               onEnd={e => handleEnd(e)}
             />
           </Col>
-          <Col>
-
-            <Form id='request-music-form' className='mb-2 flex' onSubmit={e => addMusicToQueue(e)}>
-              <Input placeholder='Add your music by paste URL here...' id='url'/>
-              <Button disabled={loading} color='success' type='submit'>+</Button>
+          <Col className='w-1/2 mr-10'>
+            <Form id='request-music-form'  className='mb-2' onSubmit={e => addMusicToQueue(e)}>
+              <Row>
+                <Col><Input placeholder='Add your music by paste URL here...'id='url' className='mr-2'/></Col>
+                <Col xs={3} className='flex justify-start'><Button disabled={loading} color='success' type='submit'> <FontAwesomeIcon icon={faMusic} className="pr-2"/>Add Music</Button></Col>
+              </Row>
+              
+              
             </Form>
             <ListGroup style={{ height: "315px", overflowY: "scroll" }}>
               {
                 queues.map((music, index) => (
-                  <ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left' active={index == playlist_index}>
+                  <ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left bg-grey ' active={index == playlist_index}>
                     <Row>
                       <Col>{music.title}</Col>
                       <Col className='text-right' xs={2}>{secondFormatting(music.duration)}</Col>
@@ -143,20 +159,19 @@ function App() {
             </ListGroup>
           </Col>
         </Row>
-
-        <div className='flex mt-2'>
+        
+        <div className=' mt-2'>
           <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
-            &lt;&lt; Prev
+            Prev
           </Button>
           <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
-           Next &gt;&gt; 
+           Next
           </Button>
-          <Button disabled={loading} onClick={handleClear} color="danger">
+          <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
             Clear Queue
           </Button>
         </div>
 
-      </header>
     </div>
   );
 }
