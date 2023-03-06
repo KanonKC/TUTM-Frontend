@@ -51,53 +51,53 @@ function App() {
     }).catch(err => {
       setloading(false)
       console.log(err)
-      if(err.response.status >= 500){
-        Swal.fire('Exceed Limit!','The request cannot be completed because it has exceeded Youtube API quota. Please try again later.','error')
+      if (err.response.status >= 500) {
+        Swal.fire('Exceed Limit!', 'The request cannot be completed because it has exceeded Youtube API quota. Please try again later.', 'error')
       }
     })
   }
 
   const urlFormatting = (url) => {
-      if(url.includes('youtu.be')){
-        let url_div = url.split("youtu.be/")
-        console.log(url_div[1])
-        return url_div[1]
+    if (url.includes('youtu.be')) {
+      let url_div = url.split("youtu.be/")
+      console.log(url_div[1])
+      return url_div[1]
+    }
+    else {
+      let url_div = url.split("?v=")
+      if (url_div.length !== 1) {
+        let query_div = url_div[1].split("&")
+        return query_div[0]
       }
-      else{
-        let url_div = url.split("?v=")
-        if(url_div.length !== 1){
-          let query_div = url_div[1].split("&")
-          return query_div[0]
-        }
-        else{
-          return url_div[0]
-        }
+      else {
+        return url_div[0]
       }
+    }
   }
 
   const secondFormatting = (second) => {
-      let h = Math.floor(second/3600)
-      second = second % 3600
-      let m = Math.floor(second/60)
-      second = second % 60
-      
-      let result = ""
-      if(second < 10){
-        result = "0" + String(second)
-      }
-      else{
-        result = String(second)
-      }
-      if(h > 0 && m < 10){
-        result = `0${m}:${result}`
-      }
-      else{
-        result = `${m}:${result}`
-      }
-      if(h > 0){
-        result = `${h}:${result}`
-      }
-      return result
+    let h = Math.floor(second / 3600)
+    second = second % 3600
+    let m = Math.floor(second / 60)
+    second = second % 60
+
+    let result = ""
+    if (second < 10) {
+      result = "0" + String(second)
+    }
+    else {
+      result = String(second)
+    }
+    if (h > 0 && m < 10) {
+      result = `0${m}:${result}`
+    }
+    else {
+      result = `${m}:${result}`
+    }
+    if (h > 0) {
+      result = `${h}:${result}`
+    }
+    return result
   }
 
   const handleClear = () => {
@@ -122,56 +122,60 @@ function App() {
   }
 
   useEffect(() => {
-    setInterval(loadQueue,1000)
+    setInterval(loadQueue, 1000)
   }, [])
 
   return (
     <div className="App">
-        {/* <h1>Turn Up The Music (BETA)</h1> */} 
-        <Row className='my-2'>
-          <Col className='flex justify-center'>
-            <YouTube
-              videoId={Playlist[playlist_index]}
-              onReady={e => handleReady(e)}
-              onEnd={e => handleEnd(e)}
-            />
-          </Col>
-          <Col className='w-1/2 mr-10'>
-            <Form id='request-music-form'  className='mb-2' onSubmit={e => addMusicToQueue(e)}>
-              <Row>
-                <Col><Input placeholder='Add your music by paste URL here...'id='url' className='mr-2'/></Col>
-                <Col xs={3} className='flex justify-start'><Button disabled={loading} color='success' type='submit'> <FontAwesomeIcon icon={faMusic} className="pr-2"/>Add Music</Button></Col>
-              </Row>
-              
-              
-            </Form>
-            <ListGroup style={{ height: "315px", overflowY: "scroll" }}>
-              {
-                queues.map((music, index) => (
-                  <ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left bg-grey ' active={index == playlist_index}>
-                    <Row>
-                      <Col>{music.title}</Col>
-                      <Col className='text-right' xs={2}>{secondFormatting(music.duration)}</Col>
-                    </Row>
-                  </ListGroupItem>
-                ))
-              }
-            </ListGroup>
-          </Col>
-        </Row>
-        
-        <div className=' mt-2'>
-          <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
-            Prev
-          </Button>
-          <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
-           Next
-          </Button>
-          <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
-            Clear Queue
-          </Button>
-        </div>
+      <div className='mt-32'>
+        <div className=''>
+          {/* <h1>Turn Up The Music (BETA)</h1> */}
+          <Row className='my-2'>
+            <Col className='flex justify-end'>
+              <h1>Now Playing</h1>
+              <YouTube
+                videoId={Playlist[playlist_index]}
+                onReady={e => handleReady(e)}
+                onEnd={e => handleEnd(e)}
+              />
+            </Col>
+            <Col className='w-1/2 mr-10'>
+              <Form id='request-music-form' className='mb-2' onSubmit={e => addMusicToQueue(e)}>
+                <Row>
+                  <Col><Input placeholder='Add your music by paste URL here...' id='url' className='' /></Col>
+                  <Col xs={3} className='flex justify-start'><Button disabled={loading} color='success' type='submit'> <FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music</Button></Col>
+                </Row>
 
+
+              </Form>
+              <ListGroup style={{ height: "315px", overflowY: "scroll" }}>
+                {
+                  queues.map((music, index) => (
+                    <ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left bg-grey ' active={index == playlist_index}>
+                      <Row>
+                        <Col>{music.title}</Col>
+                        <Col className='flex  justify-end' xs={1}>{secondFormatting(music.duration)}</Col>
+                      </Row>
+                    </ListGroupItem>
+                  ))
+                }
+              </ListGroup>
+            </Col>
+          </Row>
+
+          <div className=' mt-2'>
+            <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
+              Prev
+            </Button>
+            <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
+              Next
+            </Button>
+            <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
+              Clear Queue
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
