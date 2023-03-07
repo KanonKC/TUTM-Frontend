@@ -2,14 +2,14 @@ import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-import { addMusic, clearQueue, getAllQueues } from './services/queue.service';
+import { addMusic, clearQueue, getAllQueues, removeMusic } from './services/queue.service';
 import { Button, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
 import Swal from 'sweetalert2';
 import { MdQueueMusic } from 'react-icons/md';
 import { BiArrowToRight, BiArrowToLeft } from 'react-icons/bi';
 import { GrClearOption } from 'react-icons/gr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMusic } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faForwardStep, faMusic, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 
 function App() {
@@ -122,7 +122,10 @@ function App() {
   }
 
   useEffect(() => {
-    setInterval(loadQueue, 1000)
+    let interval = setInterval(loadQueue, 1000)
+    return () => {
+      clearInterval(interval)
+    }
   }, [])
 
   return (
@@ -131,13 +134,15 @@ function App() {
         <div className=''>
           {/* <h1>Turn Up The Music (BETA)</h1> */}
           <Row className='my-2'>
-            <Col className='flex justify-end'>
-              <h1>Now Playing</h1>
+            <Col >
+              {/* <h1 className='text-white text-start'>Now Playing</h1> */}
+              <div className='flex justify-end'>
               <YouTube
                 videoId={Playlist[playlist_index]}
                 onReady={e => handleReady(e)}
                 onEnd={e => handleEnd(e)}
               />
+              </div>
             </Col>
             <Col className='w-1/2 mr-10'>
               <Form id='request-music-form' className='mb-2' onSubmit={e => addMusicToQueue(e)}>
@@ -148,15 +153,20 @@ function App() {
 
 
               </Form>
-              <ListGroup style={{ height: "315px", overflowY: "scroll" }}>
+              <ListGroup style={{ height: "330px", overflowY: "scroll" }}>
                 {
                   queues.map((music, index) => (
-                    <ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left bg-grey ' active={index == playlist_index}>
+                    <Row>
+                    <Col><ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left bg-grey ' active={index == playlist_index}>
                       <Row>
-                        <Col>{music.title}</Col>
+                        <Col className='dotted-text'>{music.title}</Col>
                         <Col className='flex  justify-end' xs={1}>{secondFormatting(music.duration)}</Col>
                       </Row>
-                    </ListGroupItem>
+                    </ListGroupItem></Col>
+                    <Col xs={1}>
+                    <Button color='danger' onClick={() => {removeMusic(music.queue_id)}}><FontAwesomeIcon icon={faXmark}/></Button>
+                    </Col>
+                    </Row>
                   ))
                 }
               </ListGroup>
@@ -165,13 +175,13 @@ function App() {
 
           <div className=' mt-2'>
             <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
-              Prev
+              <FontAwesomeIcon icon={faBackwardStep} className="mr-0  "/> Prev
             </Button>
             <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
-              Next
+              Next <FontAwesomeIcon icon={faForwardStep} className="ml-0"/>
             </Button>
             <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
-              Clear Queue
+              <FontAwesomeIcon icon={faTrash} className="mr-2"/>Clear Queue
             </Button>
           </div>
         </div>
