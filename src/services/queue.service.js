@@ -9,8 +9,8 @@ export async function addMusic(url){
     return axios.post(`${BACKEND_URL}/api/queues`,{url: url})
 }
 
-export async function updateMusic(queue_id,is_played){
-    return axios.put(`${BACKEND_URL}/api/queues/${queue_id}`,{is_played: is_played})
+export async function updateMusic(queue_id,is_cleared){
+    return axios.put(`${BACKEND_URL}/api/queues/${queue_id}`,{is_cleared: is_cleared})
 }
 
 export async function removeMusic(queue_id){

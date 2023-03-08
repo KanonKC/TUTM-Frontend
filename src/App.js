@@ -205,7 +205,7 @@ function App() {
                                     </Col>
                                     <Col xs={5} className='flex justify-center'>
                                         <ButtonGroup className='mr-2'>
-                                            <Button disabled={loading} color='primary' onClick={() => searchMusic()}>
+                                            <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
                                                 <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
                                             </Button>
                                             <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
@@ -216,7 +216,7 @@ function App() {
                                         </ButtonGroup>
 
                                         <Button
-                                            disabled={loading}
+                                            disabled={loading || inputValue === ""}
                                             color='success'
                                             onClick={() => addMusicToQueue(inputValue)}
                                         >
