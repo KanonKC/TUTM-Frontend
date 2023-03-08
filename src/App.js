@@ -3,14 +3,15 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { addMusic, clearQueue, getAllQueues, removeMusic } from './services/queue.service';
-import { Button, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
+import { Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
 import Swal from 'sweetalert2';
 import { MdQueueMusic } from 'react-icons/md';
 import { BiArrowToRight, BiArrowToLeft } from 'react-icons/bi';
 import { GrClearOption } from 'react-icons/gr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackwardStep, faForwardStep, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Select from 'react-select'
+import { search } from './services/search.service';
 
 
 function App() {
@@ -20,9 +21,9 @@ function App() {
     const [playlist_index, setplaylist_index] = useState(0)
     const [loading, setloading] = useState(false)
 
-    const [musicOptions, setmusicOptions] = useState([])
-    const [selectedMusic, setselectedMusic] = useState(null)
-    const [inputMusic, setinputMusic] = useState(null)
+    const [inputValue, setinputValue] = useState("")
+    const [searchResult, setsearchResult] = useState([])
+    const [toggleSearchResult, settoggleSearchResult] = useState(true)
 
     const loadQueue = () => {
         getAllQueues().then(response => {
@@ -32,14 +33,13 @@ function App() {
     }
 
     const searchMusic = () => {
-        console.log('input', inputMusic)
-        setmusicOptions([
-            { value: "a", label: "Music #1" },
-            { value: "b", label: "Music #2" },
-            { value: "c", label: "Music #3" },
-            { value: "d", label: "Music #4" },
-            { value: "e", label: "Music #5" }
-        ])
+        setloading(true)
+        search(inputValue).then(response => {
+            setloading(false)
+            setsearchResult(response.data.result)
+        }).catch(err => {
+            setloading(false)
+        })
     }
 
     const handleReady = (e) => {
@@ -55,20 +55,22 @@ function App() {
         setplaylist_index((playlist_index + 1) % Playlist.length)
     }
 
-    const addMusicToQueue = (e) => {
-        e.preventDefault()
-        let formatted_url = urlFormatting(e.target.url.value)
+    const addMusicToQueue = (url) => {
+        let formatted_url = urlFormatting(url)
         console.log(formatted_url)
         setloading(true)
         addMusic(formatted_url).then(response => {
             console.log(response.data)
             setloading(false)
-            document.getElementById('request-music-form').reset()
+            setinputValue("")
         }).catch(err => {
             setloading(false)
             console.log(err)
             if (err.response.status >= 500) {
                 Swal.fire('Exceed Limit!', 'The request cannot be completed because it has exceeded Youtube API quota. Please try again later.', 'error')
+            }
+            else if (err.response.status >= 400) {
+                Swal.fire('Bad Input', 'To add music to the playlist by using search box, Please make sure that an input has a valid Youtube url.', 'error')
             }
         })
     }
@@ -169,7 +171,7 @@ function App() {
     }, [])
 
     return (
-        <div className="App">   
+        <div className="App">
             <div className='mt-32'>
                 <div className=''>
                     <Row className='my-2'>
@@ -181,43 +183,84 @@ function App() {
                                     onEnd={e => handleEnd(e)}
                                 />
                             </div>
+                            <div className='flex justify-end mt-3'>
+                                <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
+                                    <FontAwesomeIcon icon={faBackwardStep} className="mr-0  " /> Prev
+                                </Button>
+                                <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
+                                    Next <FontAwesomeIcon icon={faForwardStep} className="ml-0" />
+                                </Button>
+                                <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
+                                    <FontAwesomeIcon icon={faTrash} className="mr-2" />Clear Queue
+                                </Button>
+                            </div>
                         </Col>
                         <Col className='w-1/2 mr-10'>
-                            <Form id='request-music-form' className='mb-2' onSubmit={e => addMusicToQueue(e)}>
+                            <div className='mb-2'>
                                 <Row className='mb-2'>
-                                    {/* <Col><Select classNames="z-50" options={musicOptions} placeholder='Add your music by paste URL here...' id='url' className='text-start' onInputChange={e => setinputMusic(e)} onChange={e => setselectedMusic(e)}/></Col> */}
-                                    <Col><Input placeholder='Add your music by paste URL here...' id='url' onChange={e => setselectedMusic(e)} /></Col>
-                                    <Col xs={4} className='flex justify-center'>
-                                        <Button className='mr-2' disabled color='primary' onClick={() => searchMusic()}> <FontAwesomeIcon icon={faSearch} className="pr-2" />Search</Button>
-                                        <Button disabled={loading} color='success' type='submit'> <FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music</Button>
+                                    <Col>
+                                        <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
+                                    </Col>
+                                    <Col xs={5} className='flex justify-center'>
+                                        <ButtonGroup className='mr-2'>
+                                            <Button disabled={loading} color='primary' onClick={() => searchMusic()}>
+                                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
+                                            </Button>
+                                            <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
+                                                <FontAwesomeIcon icon={toggleSearchResult ? faMinus : faEye} className="pr-2" /> {
+                                                    toggleSearchResult ? "Close" : `Show (${searchResult.length})`
+                                                }
+                                            </Button>
+                                        </ButtonGroup>
+
+                                        <Button
+                                            disabled={loading}
+                                            color='success'
+                                            onClick={() => addMusicToQueue(inputValue)}
+                                        >
+                                            <FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music
+                                        </Button>
                                     </Col>
                                 </Row>
+                            </div>
 
+                            {(toggleSearchResult && searchResult.length > 0) &&
+                                <div>
+                                    <h4 className='text-white text-start'>Search Result ({searchResult.length})</h4>
+                                    <ListGroup className='mb-2' style={{ height: "315px", overflowY: "scroll", width: "100%" }}>
+                                        {
+                                            searchResult.map((music, index) => (
+                                                <ListGroupItem key={index} className='text-base text-left bg-grey'>
+                                                    <Row>
+                                                        <Col className='cursor-pointer'>
+                                                            <Row>
+                                                                <Col xs={3} xl={2}>{music && <img src={music.thumbnails.medium.url} />}</Col>
+                                                                <Col className="text-clip">
+                                                                    <p className='mb-0'>{music.title}</p>
+                                                                    <p className='mb-0 text-gray-400'>{music.channelTitle}</p>
+                                                                </Col>
+                                                            </Row>
+                                                        </Col>
 
-                            </Form>
-                            <ListGroup style={{ height: "315px", overflowY: "scroll", width: "100%" }}>
-                                {/* {
-                                    queues.map((music, index) => (
-                                        <Row>
-                                            <Col><ListGroupItem onClick={() => setplaylist_index(index)} type="button" className='text-base text-left bg-grey ' active={index == playlist_index}>
-                                                <Row>
-                                                    <Col className='dotted-text'>{music.title}</Col>
-                                                    <Col className='flex  justify-end' xs={1}>{secondFormatting(music.duration)}</Col>
-                                                </Row>
-                                            </ListGroupItem></Col>
-                                            <Col xs={1}>
-                                                <Button color='danger' onClick={() => { removeMusic(music.queue_id) }}><FontAwesomeIcon icon={faXmark} /></Button>
-                                            </Col>
-                                        </Row>
-                                    ))
-                                } */}
+                                                        {/* <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col> */}
+                                                        <Col xs={3} className="flex justify-end"><Button disabled={loading} color='success' onClick={() => { addMusicToQueue(music.id.videoId) }}><FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music</Button></Col>
+                                                    </Row>
+                                                </ListGroupItem>
+                                            ))
+                                        }
+                                    </ListGroup>
+                                </div>
+                            }
+
+                            <h4 className='text-white text-start'>Playlist ({queues.length})</h4>
+                            <ListGroup style={{ height: "330px", overflowY: "scroll", width: "100%" }}>
                                 {
                                     queues.map((music, index) => (
                                         <ListGroupItem key={index} className='text-base text-left bg-grey ' active={index == playlist_index}>
                                             <Row>
                                                 <Col xs={10} className='cursor-pointer' onClick={() => setplaylist_index(index)}>
                                                     <Row>
-                                                        <Col xs={3}>{music && <img src={music.thumbnail} />}</Col>
+                                                        <Col xs={3} xl={2}>{music && <img src={music.thumbnail} />}</Col>
                                                         <Col className="text-clip">
                                                             <p className='mb-0'>{music.title}</p>
                                                             <p className='mb-0 text-gray-400'>{music.channel_title}</p>
@@ -236,18 +279,6 @@ function App() {
                             </ListGroup>
                         </Col>
                     </Row>
-
-                    <div className=' mt-2'>
-                        <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
-                            <FontAwesomeIcon icon={faBackwardStep} className="mr-0  " /> Prev
-                        </Button>
-                        <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
-                            Next <FontAwesomeIcon icon={faForwardStep} className="ml-0" />
-                        </Button>
-                        <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
-                            <FontAwesomeIcon icon={faTrash} className="mr-2" />Clear Queue
-                        </Button>
-                    </div>
                 </div>
             </div>
         </div>
