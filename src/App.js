@@ -169,13 +169,11 @@ function App() {
     }, [])
 
     return (
-        <div className="App">
+        <div className="App">   
             <div className='mt-32'>
                 <div className=''>
-                    {/* <h1>Turn Up The Music (BETA)</h1> */}
                     <Row className='my-2'>
-                        <Col >
-                            {/* <h1 className='text-white text-start'>Now Playing</h1> */}
+                        <Col>
                             <div className='flex justify-end'>
                                 <YouTube
                                     videoId={Playlist[playlist_index]}
@@ -197,7 +195,7 @@ function App() {
 
 
                             </Form>
-                            <ListGroup style={{ height: "315px", overflowY: "scroll" }}>
+                            <ListGroup style={{ height: "315px", overflowY: "scroll", width: "100%" }}>
                                 {/* {
                                     queues.map((music, index) => (
                                         <Row>
@@ -215,19 +213,19 @@ function App() {
                                 } */}
                                 {
                                     queues.map((music, index) => (
-                                        <ListGroupItem className='text-base text-left bg-grey ' active={index == playlist_index}>
+                                        <ListGroupItem key={index} className='text-base text-left bg-grey ' active={index == playlist_index}>
                                             <Row>
-                                                <Col className='cursor-pointer' onClick={() => setplaylist_index(index)}>
+                                                <Col xs={10} className='cursor-pointer' onClick={() => setplaylist_index(index)}>
                                                     <Row>
-                                                        <Col xs={2}><img src={music.thumbnail} /></Col>
-                                                        <Col className='dotted-text'>
+                                                        <Col xs={3}>{music && <img src={music.thumbnail} />}</Col>
+                                                        <Col className="text-clip">
                                                             <p className='mb-0'>{music.title}</p>
                                                             <p className='mb-0 text-gray-400'>{music.channel_title}</p>
                                                         </Col>
                                                     </Row>
                                                 </Col>
 
-                                                <Col className='flex justify-end cursor-default' xs={1}>{secondFormatting(music.duration)}</Col>
+                                                <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col>
                                                 <Col xs={1}><Button color='danger' onClick={() => { confirmationRemoveMusic(music.queue_id, index) }}><FontAwesomeIcon icon={faXmark} /></Button></Col>
                                             </Row>
                                         </ListGroupItem>
