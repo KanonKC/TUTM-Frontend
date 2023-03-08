@@ -177,11 +177,13 @@ function App() {
                     <Row className='my-2'>
                         <Col>
                             <div className='flex justify-end'>
+                                <div className='themed-border'>
                                 <YouTube
                                     videoId={Playlist[playlist_index]}
                                     onReady={e => handleReady(e)}
                                     onEnd={e => handleEnd(e)}
                                 />
+                                </div>
                             </div>
                             <div className='flex justify-end mt-3'>
                                 <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
