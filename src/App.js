@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-import { addMusic, clearQueue, getAllQueues, removeMusic } from './services/queue.service';
+import { addMusic, clearQueue, getAllQueues, playedIncrement, removeMusic } from './services/queue.service';
 import { Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
 import Swal from 'sweetalert2';
 import { MdQueueMusic } from 'react-icons/md';
@@ -22,8 +22,8 @@ function App() {
 
     const [Playlist, setPlaylist] = useState([])
     const [playlist_index, setplaylist_index] = useState(0)
-    const [playLoop,setplayLoop] = useState(false)
-    const [index_mode,setindex_mode] = useState({ loop: 0, last: 0 })
+    // const [playLoop,setplayLoop] = useState(false)
+    // const [index_mode,setindex_mode] = useState({ loop: 0, last: 0 })
 
     const [inputValue, setinputValue] = useState("")
     const [searchResult, setsearchResult] = useState([])
@@ -31,9 +31,24 @@ function App() {
 
     const loadQueue = () => {
         getAllQueues().then(response => {
-            setqueues(response.data.queues)
+            console.log(response.data.queues.map((music,index) => ({played_count: music.played_count,index: index})))
+            setqueues(response.data.queues.map((music,index) => ({...music,index: index})))
             setPlaylist(response.data.queues.map(music => music.url))
         })
+    }
+
+    const selectNextMusic = () => {
+        const current_id = queues.filter(music => music.url === Playlist[playlist_index])[0].queue_id
+        const no_current = queues.filter(music => music.queue_id !== current_id)
+        const least_played = Math.min(...no_current.map(music => music.played_count))
+        console.log('Least played',current_id,no_current,least_played)
+        const first_group = no_current.filter(music => music.played_count === least_played)
+
+        const first_next = first_group.filter(music => music.queue_id > current_id)
+        if(first_next[0]){
+            return first_next[0].index
+        }
+        return first_group[0].index
     }
 
     const searchMusic = () => {
@@ -47,50 +62,57 @@ function App() {
     }
 
     const handleReady = (e) => {
-        // console.log("Ready", playlist_index)
         setTimeout(() => {
             e.target.playVideo();
         }, 1000)
     }
 
     const handleEnd = (e) => {
-        // console.log("End", playlist_index)
-        if(!playLoop){
-            setplaylist_index(playlist_index + 1)
-        }
-        else{
-            setplaylist_index((playlist_index + 1) % Playlist.length)
-        }
+
+        let queue_id = queues.filter((music,index) => index === playlist_index)[0].queue_id
+        playedIncrement(queue_id).then(response => {
+            return loadQueue()
+        }).then(response => {
+            let nm = selectNextMusic()
+            console.log(nm)
+            setplaylist_index(nm)
+        })
+        // if(!playLoop){
+        //     setplaylist_index(playlist_index + 1)
+        // }
+        // else{
+        //     setplaylist_index((playlist_index + 1) % Playlist.length)
+        // }
     }
 
-    useEffect(() => {
-        console.log("Considered Loop",playlist_index,Playlist.length)
-        if(playlist_index == 0 && Playlist.length == 0){
-            return
-        }
-        if(!playLoop && ((playlist_index) >= Playlist.length)){
-            setplayLoop(true)
-        }
-        else if(playLoop && ((index_mode.last) < Playlist.length)){
-            setplayLoop(false)
-        }
-    },[playlist_index])
+    // useEffect(() => {
+    //     console.log("Considered Loop",playlist_index,Playlist.length)
+    //     if(playlist_index == 0 && Playlist.length == 0){
+    //         return
+    //     }
+    //     if(!playLoop && ((playlist_index) >= Playlist.length)){
+    //         setplayLoop(true)
+    //     }
+    //     else if(playLoop && ((index_mode.last) < Playlist.length)){
+    //         setplayLoop(false)
+    //     }
+    // },[playlist_index])
 
-    useEffect(() => {
-        console.log("Switch Mode")
-        if(playLoop){
-            setindex_mode({...index_mode, last: playlist_index})
-            setplaylist_index(index_mode.loop)
-        }
-        else{
-            setindex_mode({...index_mode, loop: playlist_index})
-            setplaylist_index(index_mode.last)
-        }
-    },[playLoop])
+    // useEffect(() => {
+    //     console.log("Switch Mode")
+    //     if(playLoop){
+    //         setindex_mode({...index_mode, last: playlist_index})
+    //         setplaylist_index(index_mode.loop)
+    //     }
+    //     else{
+    //         setindex_mode({...index_mode, loop: playlist_index})
+    //         setplaylist_index(index_mode.last)
+    //     }
+    // },[playLoop])
 
-    useEffect(() => {
-        console.log(index_mode,playLoop,playlist_index)
-    },[index_mode,playLoop,playlist_index])
+    // useEffect(() => {
+    //     console.log(index_mode,playLoop,playlist_index)
+    // },[index_mode,playLoop,playlist_index])
 
     const addMusicToQueue = (url) => {
         let formatted_url = urlFormatting(url)
@@ -156,9 +178,9 @@ function App() {
     }
 
     const handleClear = () => {
-        setplaylist_index(0)
-        setplayLoop(false)
-        setindex_mode({ loop: 0, last: 0 })
+        // setplaylist_index(0)
+        // setplayLoop(false)
+        // setindex_mode({ loop: 0, last: 0 })
         Swal.fire({
             title: 'Are you sure that you want to clear all music in playlist?',
             text: "This will remove all music, and you won't be able to revert this!",
@@ -199,6 +221,9 @@ function App() {
             console.log(index, playlist_index)
             if (index < playlist_index) {
                 setplaylist_index(playlist_index - 1)
+            }
+            else{
+                setPlaylist(playlist_index)
             }
         })
     }
