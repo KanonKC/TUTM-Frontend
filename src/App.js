@@ -64,6 +64,10 @@ function App() {
     }
 
     useEffect(() => {
+        console.log("Considered Loop",playlist_index,Playlist.length)
+        if(playlist_index == 0 && Playlist.length == 0){
+            return
+        }
         if(!playLoop && ((playlist_index) >= Playlist.length)){
             setplayLoop(true)
         }
@@ -152,6 +156,9 @@ function App() {
     }
 
     const handleClear = () => {
+        setplaylist_index(0)
+        setplayLoop(false)
+        setindex_mode({ loop: 0, last: 0 })
         Swal.fire({
             title: 'Are you sure that you want to clear all music in playlist?',
             text: "This will remove all music, and you won't be able to revert this!",
