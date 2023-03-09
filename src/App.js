@@ -173,9 +173,9 @@ function App() {
     return (
         <div className="App">
             <div className='mt-32'>
-                <div className=''>
+                <div className='' style={{width: "99%"}}>
                     <Row className='my-2'>
-                        <Col>
+                        <Col xs={12} md={6}>
                             <div className='flex justify-end'>
                                 <div className='themed-border'>
                                 <YouTube
@@ -197,13 +197,13 @@ function App() {
                                 </Button>
                             </div>
                         </Col>
-                        <Col className='w-1/2 mr-10'>
+                        <Col className='w-1/2'>
                             <div className='mb-2'>
                                 <Row className='mb-2'>
                                     <Col>
                                         <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
                                     </Col>
-                                    <Col xs={5} className='flex justify-center'>
+                                    <Col xs={6} className='flex justify-center'>
                                         <ButtonGroup className='mr-2'>
                                             <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
                                                 <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
