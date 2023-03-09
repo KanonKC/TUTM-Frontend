@@ -16,10 +16,14 @@ import { search } from './services/search.service';
 
 function App() {
 
+    
     const [queues, setqueues] = useState([])
+    const [loading, setloading] = useState(false)
+
     const [Playlist, setPlaylist] = useState([])
     const [playlist_index, setplaylist_index] = useState(0)
-    const [loading, setloading] = useState(false)
+    const [playLoop,setplayLoop] = useState(false)
+    const [index_mode,setindex_mode] = useState({ loop: 0, last: 0 })
 
     const [inputValue, setinputValue] = useState("")
     const [searchResult, setsearchResult] = useState([])
@@ -45,15 +49,44 @@ function App() {
     const handleReady = (e) => {
         // console.log("Ready", playlist_index)
         setTimeout(() => {
-            // console.log("Play")
             e.target.playVideo();
         }, 1000)
     }
 
     const handleEnd = (e) => {
         // console.log("End", playlist_index)
-        setplaylist_index((playlist_index + 1) % Playlist.length)
+        if(!playLoop){
+            setplaylist_index(playlist_index + 1)
+        }
+        else{
+            setplaylist_index((playlist_index + 1) % Playlist.length)
+        }
     }
+
+    useEffect(() => {
+        if(!playLoop && ((playlist_index) >= Playlist.length)){
+            setplayLoop(true)
+        }
+        else if(playLoop && ((index_mode.last) < Playlist.length)){
+            setplayLoop(false)
+        }
+    },[playlist_index])
+
+    useEffect(() => {
+        console.log("Switch Mode")
+        if(playLoop){
+            setindex_mode({...index_mode, last: playlist_index})
+            setplaylist_index(index_mode.loop)
+        }
+        else{
+            setindex_mode({...index_mode, loop: playlist_index})
+            setplaylist_index(index_mode.last)
+        }
+    },[playLoop])
+
+    useEffect(() => {
+        console.log(index_mode,playLoop,playlist_index)
+    },[index_mode,playLoop,playlist_index])
 
     const addMusicToQueue = (url) => {
         let formatted_url = urlFormatting(url)
@@ -186,10 +219,10 @@ function App() {
                                 </div>
                             </div>
                             <div className='flex justify-end mt-3'>
-                                <Button color='light' onClick={() => setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}>
+                                <Button color='light' onClick={() => {setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length)}}>
                                     <FontAwesomeIcon icon={faBackwardStep} className="mr-0  " /> Prev
                                 </Button>
-                                <Button color='light' className='mx-2' onClick={() => setplaylist_index((playlist_index + 1) % Playlist.length)}>
+                                <Button color='light' className='mx-2' onClick={() => {setplaylist_index((playlist_index + 1) % Playlist.length)}}>
                                     Next <FontAwesomeIcon icon={faForwardStep} className="ml-0" />
                                 </Button>
                                 <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
