@@ -1,5 +1,6 @@
 body {
   background-color: #282c34; 
+  color: white;
 }
 
 .App {
@@ -42,4 +43,12 @@ body {
   border-radius: 0px;
   padding: 15px;
   box-sizing: border-box;
+}
+
+.themed-color {
+  font-weight: bold;
+  background: #FF00FB;
+  background: linear-gradient(to bottom right, #FF00FB 0%, #00FFEB 95%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
