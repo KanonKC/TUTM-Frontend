@@ -24,6 +24,7 @@ const Player = () => {
     const [toggleSearchResult, settoggleSearchResult] = useState(true)
 
     const [nowPlaying, setnowPlaying] = useState(null)
+    const [initialIndex,setinitialIndex] = useState(null)
 
     const loadQueue = () => {
         getAllQueues().then(response => {
@@ -33,7 +34,8 @@ const Player = () => {
         })
 
         getPlaylist().then(response => {
-            setnowPlaying(response.data)
+            setnowPlaying(response.data)    
+            // setplaylist_index(response.data.current_queue_id)
         })
     }
 
@@ -229,6 +231,16 @@ const Player = () => {
     }
 
     useEffect(() => {
+        getPlaylist().then(response => {
+            if(queues.length === 0){
+                return
+            }
+            
+            setplaylist_index(queues.filter(music => music.queue_id === response.data.current_queue_id)[0].index)
+        })
+    },[queues])
+
+    useEffect(() => {
         let interval = setInterval(loadQueue, 1000)
         return () => {
             clearInterval(interval)
@@ -237,7 +249,6 @@ const Player = () => {
 
     useEffect(() => {
         let filtered = queues.filter((v, i) => i === playlist_index)
-        console.log("Filtered",filtered)
         if(filtered.length === 0){
             return
         }
@@ -252,8 +263,8 @@ const Player = () => {
                 <div className='' style={{ width: "99%" }}>
                     <Row className='my-2'>
                         <Col xs={12} md={6}>
-                            {nowPlaying && <h4 className='text-white'>Now Playing: {nowPlaying.current.title}</h4>}
-                            <div className='flex justify-end'>
+                            {/* {nowPlaying && <h4 className='text-white'>Now Playing: {nowPlaying.current.title}</h4>} */}
+                            <div className='flex justify-end'>  
                                 <div className='themed-border'>
                                     <YouTube
                                         videoId={Playlist[playlist_index]}
