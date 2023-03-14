@@ -24,7 +24,7 @@ const PlaylistView = () => {
 
   const [nowPlaying, setnowPlaying] = useState(null)
 
-  const [isOpenPopup,setisOpenPopup] = useState(false)
+  const [isOpenPopup, setisOpenPopup] = useState(false)
 
   const loadQueue = () => {
     getAllQueues().then(response => {
@@ -120,56 +120,29 @@ const PlaylistView = () => {
 
   return (
     <div>
-      <AddMusicPopup isOpen={isOpenPopup} setisOpen={setisOpenPopup}/>
+      <AddMusicPopup isOpen={isOpenPopup} setisOpen={setisOpenPopup} />
+
       {nowPlaying && <h2 className='text-white text-center mt-10 mx-[10%]'><span className='themed-color'>Now Playing</span>: {nowPlaying.current.title}</h2>}
 
-      <div className='mb-2 md:mt-10'>
+      <div className='md:mb-2 md:mt-10'>
         <div className='mx-[5%] lg:mx-[15%] xl:mx-[20%]'>
           <Row>
-            <Col xs={12} md={6} xl={7}>
+            <Col xs={12} md={7} xl={8} className="mb-2">
               <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
             </Col>
 
             <Col className='flex justify-center'>
-              <div className='hidden lg:block'>
-
-                <ButtonGroup className='mr-2'>
-                  <Button className='' disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
-                    <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
-                  </Button>
-                  <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
-                    <FontAwesomeIcon icon={toggleSearchResult ? faMinus : faEye} className="pr-2" /> {
-                      toggleSearchResult ? "Close" : `Show (${searchResult.length})`
-                    }
-                  </Button>
-                </ButtonGroup>
-
+              <div className=''>
                 <Button
                   disabled={loading || inputValue === ""}
                   color='success'
                   onClick={() => addMusicToQueue(inputValue)}
                 >
-                  <FontAwesomeIcon icon={faMusic} className="pr-2" />Add <span className='hidden xl:inline'>Music</span>
+                  <FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music
                 </Button>
-              </div>
 
-              <div className='lg:hidden mt-2'>
-
-                <ButtonGroup className='mr-2'>
-                  <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
-                    <FontAwesomeIcon icon={faSearch} className="pr-0" />
-                  </Button>
-                  <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
-                    <FontAwesomeIcon icon={toggleSearchResult ? faMinus : faEye} className="pr-0" />
-                  </Button>
-                </ButtonGroup>
-
-                <Button
-                  disabled={loading || inputValue === ""}
-                  color='success'
-                  onClick={() => addMusicToQueue(inputValue)}
-                >
-                  <FontAwesomeIcon icon={faMusic} className="pr-2" />Add
+                <Button className='ml-2' disabled={loading} color='primary' onClick={() => setisOpenPopup(true)}>
+                  <FontAwesomeIcon icon={faSearch} className="pr-2" />Search More
                 </Button>
               </div>
 
@@ -178,38 +151,6 @@ const PlaylistView = () => {
           </Row>
         </div>
         <div className='ml-[5%] lg:mx-[15%] xl:mx-[20%]'>
-
-          {(toggleSearchResult && searchResult.length > 0) &&
-            <div>
-              <h4 className='text-white text-start mt-1'>Search Result ({searchResult.length})</h4>
-              <ListGroup className='mb-2' style={{ overflowY: "scroll", width: "100%" }}>
-                {
-                  searchResult.map((music, index) => (
-                    <ListGroupItem key={index} className='text-base text-left bg-grey'>
-                      <Row>
-                        <Col className='cursor-pointer'>
-                          <Row>
-                            <Col xs={3} xl={2}>{music && <img src={music.thumbnails.medium.url} />}</Col>
-                            <Col className="text-clip">
-                              <p className='mb-0 text-sm xl:text-base'>{music.title}</p>
-                              <p className='mb-0 text-sm xl:text-base text-gray-400'>{music.channelTitle}</p>
-                            </Col>
-                          </Row>
-                        </Col>
-
-                        {/* <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col> */}
-                        <Col xs={3} className="flex justify-end"><Button disabled={loading} color='success' onClick={() => { addMusicToQueue(music.id.videoId) }}><FontAwesomeIcon icon={faMusic} className="pr-1 md:pr-2" />
-                          <span className='hidden md:block'>
-                            Add Music
-                          </span>
-                        </Button></Col>
-                      </Row>
-                    </ListGroupItem>
-                  ))
-                }
-              </ListGroup>
-            </div>
-          }
 
           <h4 className='text-white text-start mt-3'>Playlist ({queues.length})</h4>
           <ListGroup className='h-[45vh] md:h-[51.5vh] xl:h-[60vh]' style={{ overflowY: "scroll", width: "100%" }}>
