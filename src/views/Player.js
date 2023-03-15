@@ -79,42 +79,8 @@ const Player = () => {
             console.log(nm)
             setplaylist_index(nm)
         })
-        // if(!playLoop){
-        //     setplaylist_index(playlist_index + 1)
-        // }
-        // else{
-        //     setplaylist_index((playlist_index + 1) % Playlist.length)
-        // }
+
     }
-
-    // useEffect(() => {
-    //     console.log("Considered Loop",playlist_index,Playlist.length)
-    //     if(playlist_index == 0 && Playlist.length == 0){
-    //         return
-    //     }
-    //     if(!playLoop && ((playlist_index) >= Playlist.length)){
-    //         setplayLoop(true)
-    //     }
-    //     else if(playLoop && ((index_mode.last) < Playlist.length)){
-    //         setplayLoop(false)
-    //     }
-    // },[playlist_index])
-
-    // useEffect(() => {
-    //     console.log("Switch Mode")
-    //     if(playLoop){
-    //         setindex_mode({...index_mode, last: playlist_index})
-    //         setplaylist_index(index_mode.loop)
-    //     }
-    //     else{
-    //         setindex_mode({...index_mode, loop: playlist_index})
-    //         setplaylist_index(index_mode.last)
-    //     }
-    // },[playLoop])
-
-    // useEffect(() => {
-    //     console.log(index_mode,playLoop,playlist_index)
-    // },[index_mode,playLoop,playlist_index])
 
     const addMusicToQueue = (url) => {
         let formatted_url = urlFormatting(url)

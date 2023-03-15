@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
+import { Modal, Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
@@ -10,6 +10,8 @@ import { search } from '../services/search.service';
 const AddMusicPopup = ({ isOpen, setisOpen }) => {
     const [queues, setqueues] = useState([])
     const [loading, setloading] = useState(false)
+
+    const [searchType, setsearchType] = useState(1)
 
     const [inputValue, setinputValue] = useState("")
     const [searchResult, setsearchResult] = useState([])
@@ -87,7 +89,27 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
     }, [])
     return (
         <Modal isOpen={isOpen} toggle={() => setisOpen(!isOpen)} size="lg">
-            <div className='p-3 md:ml-3'>
+            <div className='py-3 pl-3 md:ml-3'>
+                <div className='flex'>
+                    <Pagination className='mx-auto' listClassName='text-black'>
+                        <PaginationItem onClick={() => setsearchType(0)} active={searchType === 0}>
+                            <PaginationLink>
+                                Add by URL
+                            </PaginationLink>
+                        </PaginationItem >
+                        <PaginationItem onClick={() => setsearchType(1)} active={searchType === 1}>
+                            <PaginationLink>
+                                Search Video
+                            </PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem onClick={() => setsearchType(2)} active={searchType === 2}>
+                            <PaginationLink>
+                                Search Playlist
+                            </PaginationLink>
+                        </PaginationItem>
+                    </Pagination>
+                </div>
+
                 <Row>
                     <Col xs={12} md={6} xl={6}>
                         <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
@@ -96,24 +118,22 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
                     <Col className='flex justify-center'>
                         <div className='hidden lg:block'>
 
-                            <ButtonGroup className='mr-2'>
-                                <Button className='' disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
-                                    <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
-                                </Button>
-                                <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
-                                    <FontAwesomeIcon icon={toggleSearchResult ? faMinus : faEye} className="pr-2" /> {
-                                        toggleSearchResult ? "Close" : `Show (${searchResult.length})`
-                                    }
-                                </Button>
-                            </ButtonGroup>
 
-                            <Button
+
+
+
+                            {searchType === 0 && <Button
                                 disabled={loading || inputValue === ""}
                                 color='success'
                                 onClick={() => addMusicToQueue(inputValue)}
                             >
                                 <FontAwesomeIcon icon={faMusic} className="pr-2" />Add <span className='hidden xl:inline'>Music</span>
                             </Button>
+                            }
+
+                            {searchType === 1 && <Button className='' disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
+                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
+                            </Button>}
                         </div>
 
                         <div className='lg:hidden mt-2'>

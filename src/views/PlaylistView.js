@@ -38,16 +38,6 @@ const PlaylistView = () => {
     })
   }
 
-  const searchMusic = () => {
-    setloading(true)
-    search(inputValue).then(response => {
-      setloading(false)
-      setsearchResult(response.data.result)
-    }).catch(err => {
-      setloading(false)
-    })
-  }
-
   const addMusicToQueue = (url) => {
     let formatted_url = urlFormatting(url)
     console.log(formatted_url)
