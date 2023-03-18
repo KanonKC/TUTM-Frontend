@@ -29,12 +29,12 @@ const PlaylistView = () => {
 
   const loadQueue = () => {
     getAllQueues().then(response => {
-      console.log(response.data.queues)
+      // console.log(response.data.queues)
       setqueues(response.data.queues)
     })
 
     getPlaylist().then(response => {
-      console.log(response.data)
+      // console.log(response.data)
       setnowPlaying(response.data)
     })
   }

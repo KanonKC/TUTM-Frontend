@@ -19,6 +19,20 @@ export function urlFormatting(url) {
     }
 }
 
+export function playlistUrlFormatting(url){
+    if (url.includes('youtube.com')){
+        const playlistReg = /list=.*&|list=.*/
+        let result = playlistReg.exec(url)[0].slice(5)
+        if(result[result.length-1] === '&'){
+            result = result.slice(0,-1)
+        }
+        return result
+    }
+    else{
+        return url
+    }
+}
+
 export function secondFormatting(second) {
     let h = Math.floor(second / 3600)
     second = second % 3600

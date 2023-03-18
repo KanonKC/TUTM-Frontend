@@ -10,8 +10,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Select from 'react-select'
 import { search, searchVideo } from '../services/search.service';
-import { getPlaylist, playIndedx, playIndex, playNextVideo, playPrevVideo, updatePlaylist } from '../services/playlist.service';
+import { getPlaylist, playAlgorithm, playIndedx, playIndex, playNextVideo, playPrevVideo, updatePlaylist } from '../services/playlist.service';
 import { secondFormatting, urlFormatting } from '../services/utility.module';
+import ReactPlayer from 'react-player';
 
 const Player = () => {
     const [queues, setqueues] = useState([])
@@ -50,13 +51,18 @@ const Player = () => {
     }
 
     const handleReady = (e) => {
-        setTimeout(() => {
-            e.target.playVideo();
-        }, 1000)
+        // setTimeout(() => {
+        //     console.log("Hello")
+        //     e.target.playVideo();
+        // }, 1000)
+        console.log("Ready")
     }
 
     const handleEnd = (e) => {
-
+        playedIncrement(queues[nowPlaying.current_index].queue_id).then(response => {
+            console.log(response)
+            return playAlgorithm(1)
+        })
         // let queue_id = queues.filter((music, index) => index === playlist_index)[0].queue_id
         // playedIncrement(queue_id).then(response => {
         //     return loadQueue()
@@ -65,7 +71,7 @@ const Player = () => {
         //     console.log(nm)
         //     setplaylist_index(nm)
         // })
-
+        console.log("End")
     }
 
     const addMusicToQueue = (url) => {
@@ -113,7 +119,7 @@ const Player = () => {
         })
     }
 
-    const confirmationRemoveMusic = (queue_id, index) => {
+    const confirmationRemoveMusic = (queue_id) => {
         Swal.fire({
             title: 'Remove Warning',
             text: 'Are you sure that you want to remove this music?',
@@ -123,19 +129,7 @@ const Player = () => {
             confirmButtonText: 'Yes'
         }).then((result) => {
             if (result.isConfirmed) {
-                handleRemoveMusic(queue_id, index)
-            }
-        })
-    }
-
-    const handleRemoveMusic = (queue_id, index) => {
-        removeMusic(queue_id).then(() => {
-            console.log(index, playlist_index)
-            if (index < playlist_index) {
-                setplaylist_index(playlist_index - 1)
-            }
-            else {
-                setPlaylist(playlist_index)
+                removeMusic(queue_id)
             }
         })
     }
@@ -156,10 +150,14 @@ const Player = () => {
                             {/* {nowPlaying && <h4 className='text-white'>Now Playing: {nowPlaying.current.title}</h4>} */}
                             <div className='flex justify-end'>  
                                 <div className='themed-border'>
-                                    <YouTube
-                                        videoId={queues.length > 0 && queues[nowPlaying.current_index].video.youtube_id}
+                                    <ReactPlayer
+                                        light={true}
+                                        controls
+                                        playing
+                                        url={`https://www.youtube.com/watch?v=${queues.length > 0 && queues[nowPlaying.current_index].video.youtube_id}`}
+                                        // url="https://www.twitch.tv/videos/1768582540"
                                         onReady={e => handleReady(e)}
-                                        onEnd={e => handleEnd(e)}
+                                        onEnded={e => handleEnd(e)}
                                     />
                                 </div>
                             </div>
@@ -249,7 +247,7 @@ const Player = () => {
                                                 </Col>
 
                                                 <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.video.duration)}</Col>
-                                                <Col xs={1}><Button color='danger' onClick={() => { confirmationRemoveMusic(music.queue_id, index) }}><FontAwesomeIcon icon={faXmark} /></Button></Col>
+                                                <Col xs={1}><Button color='danger' onClick={() => { confirmationRemoveMusic(music.queue_id) }}><FontAwesomeIcon icon={faXmark} /></Button></Col>
                                             </Row>
                                         </ListGroupItem>
 

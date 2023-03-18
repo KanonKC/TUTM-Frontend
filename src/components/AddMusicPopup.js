@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faEye, faForwardStep, faLink, faListUl, faMinus, faMusic, faPlay, faSearch, faTrash, faVideo, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { addMusic, clearQueue, getAllQueues, playedIncrement, removeMusic } from '../services/queue.service';
 import { getPlaylist, updatePlaylist } from '../services/playlist.service';
 import { search, searchPlaylist, searchVideo } from '../services/search.service';
+import { playlistUrlFormatting } from '../services/utility.module';
 
 const AddMusicPopup = ({ isOpen, setisOpen }) => {
 
@@ -52,8 +53,10 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
     }
 
     const handleSearchPlaylist = () => {
+        console.log("Handle")
+        let formatted_url = playlistUrlFormatting(inputValue)
         setloading(true)
-        searchPlaylist(inputValue).then(response => {
+        searchPlaylist(formatted_url).then(response => {
             setloading(false)
             setplaylistResult(response.data.result)
         }).catch(err => {
@@ -63,7 +66,9 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
 
     const addMusicToQueue = (url) => {
         console.log(console.log(url))
-        let formatted_url = urlFormatting(url)
+        let formatted_url;
+        formatted_url = urlFormatting(url)
+        console.log(formatted_url)
         setloading(true)
         addMusic(1,formatted_url).then(response => {
             console.log(response.data)
@@ -105,6 +110,7 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
             clearInterval(interval)
         }
     }, [])
+    
     return (
         <Modal isOpen={isOpen} toggle={() => setisOpen(!isOpen)} size="lg">
             <div className='py-3 pl-3 md:ml-3'>
@@ -112,17 +118,17 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
                     <Pagination className='mx-auto' listClassName='text-black'>
                         <PaginationItem onClick={() => setsearchType(0)} active={searchType === 0}>
                             <PaginationLink>
-                                Add by URL
+                                <FontAwesomeIcon icon={faLink} className="pr-1"/>Add by URL
                             </PaginationLink>
                         </PaginationItem >
                         <PaginationItem onClick={() => setsearchType(1)} active={searchType === 1}>
                             <PaginationLink>
-                                Search Video
+                                <FontAwesomeIcon icon={faPlay} className="pr-1"/>Search Video
                             </PaginationLink>
                         </PaginationItem>
                         <PaginationItem onClick={() => setsearchType(2)} active={searchType === 2}>
                             <PaginationLink>
-                                Search Playlist
+                                <FontAwesomeIcon icon={faListUl} className="pr-1"/>Search Playlist
                             </PaginationLink>
                         </PaginationItem>
                     </Pagination>
