@@ -5,9 +5,16 @@ import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTra
 import Swal from 'sweetalert2';
 import { addMusic, clearQueue, getAllQueues, playedIncrement, removeMusic } from '../services/queue.service';
 import { getPlaylist, updatePlaylist } from '../services/playlist.service';
-import { search } from '../services/search.service';
+import { search, searchPlaylist, searchVideo } from '../services/search.service';
 
 const AddMusicPopup = ({ isOpen, setisOpen }) => {
+
+    const placeHolderContent = [
+        "Add your music by paste URL here ...",
+        "Add your music by search from Youtube videos ...",
+        "Paste Youtune Playlist url and add your music ..."
+    ]
+
     const [queues, setqueues] = useState([])
     const [loading, setloading] = useState(false)
 
@@ -15,6 +22,7 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
 
     const [inputValue, setinputValue] = useState("")
     const [searchResult, setsearchResult] = useState([])
+    const [playlistResult, setplaylistResult] = useState([])
     const [toggleSearchResult, settoggleSearchResult] = useState(true)
 
     const [nowPlaying, setnowPlaying] = useState(null)
@@ -23,19 +31,19 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
 
     const loadQueue = () => {
         getAllQueues().then(response => {
-            console.log(response.data.queues.map((music, index) => ({ ...music, index: index })))
+            // console.log(response.data.queues.map((music, index) => ({ ...music, index: index })))
             setqueues(response.data.queues.map((music, index) => ({ ...music, index: index })))
         })
 
         getPlaylist().then(response => {
-            console.log(response.data)
+            // console.log(response.data)
             setnowPlaying(response.data)
         })
     }
 
-    const searchMusic = () => {
+    const handleSearchVideo = () => {
         setloading(true)
-        search(inputValue).then(response => {
+        searchVideo(inputValue).then(response => {
             setloading(false)
             setsearchResult(response.data.result)
         }).catch(err => {
@@ -43,11 +51,21 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
         })
     }
 
-    const addMusicToQueue = (url) => {
-        let formatted_url = urlFormatting(url)
-        console.log(formatted_url)
+    const handleSearchPlaylist = () => {
         setloading(true)
-        addMusic(formatted_url).then(response => {
+        searchPlaylist(inputValue).then(response => {
+            setloading(false)
+            setplaylistResult(response.data.result)
+        }).catch(err => {
+            setloading(false)
+        })
+    }
+
+    const addMusicToQueue = (url) => {
+        console.log(console.log(url))
+        let formatted_url = urlFormatting(url)
+        setloading(true)
+        addMusic(1,formatted_url).then(response => {
             console.log(response.data)
             setloading(false)
             setinputValue("")
@@ -111,16 +129,12 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
                 </div>
 
                 <Row>
-                    <Col xs={12} md={6} xl={6}>
-                        <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
+                    <Col xs={12} md={9} xl={9}>
+                        <Input placeholder={placeHolderContent[searchType]} value={inputValue} onChange={e => setinputValue(e.target.value)} />
                     </Col>
 
                     <Col className='flex justify-center'>
                         <div className='hidden lg:block'>
-
-
-
-
 
                             {searchType === 0 && <Button
                                 disabled={loading || inputValue === ""}
@@ -131,15 +145,19 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
                             </Button>
                             }
 
-                            {searchType === 1 && <Button className='' disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
-                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
+                            {searchType === 1 && <Button className='' disabled={loading || inputValue === ""} color='primary' onClick={() => handleSearchVideo()}>
+                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search Video
+                            </Button>}
+
+                            {searchType === 2 && <Button className='' disabled={loading || inputValue === ""} color='primary' onClick={() => handleSearchPlaylist()}>
+                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search Playlist
                             </Button>}
                         </div>
 
                         <div className='lg:hidden mt-2'>
 
                             <ButtonGroup className='mr-2'>
-                                <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
+                                <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchVideo()}>
                                     <FontAwesomeIcon icon={faSearch} className="pr-0" />
                                 </Button>
                                 <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
@@ -160,7 +178,7 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
 
                 </Row>
 
-                {(toggleSearchResult && searchResult.length > 0) &&
+                {(toggleSearchResult && searchResult.length > 0 && searchType === 1) &&
                     <div>
                         <h4 className='text-white text-start mt-1'>Search Result ({searchResult.length})</h4>
                         <ListGroup flush className='mb-2' style={{ overflowY: "scroll", width: "100%" }}>
@@ -168,7 +186,7 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
                                 searchResult.map((music, index) => (
                                     <ListGroupItem key={index} className='text-base text-left bg-grey'>
                                         <Row>
-                                            <Col className='cursor-pointer'>
+                                            <Col className=''>
                                                 <Row>
                                                     <Col xs={3} xl={2}>{music && <img src={music.thumbnails.medium.url} />}</Col>
                                                     <Col className="text-clip">
@@ -180,6 +198,38 @@ const AddMusicPopup = ({ isOpen, setisOpen }) => {
 
                                             {/* <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col> */}
                                             <Col xs={3} className="flex justify-end"><Button disabled={loading} color='success' onClick={() => { addMusicToQueue(music.id.videoId) }}><FontAwesomeIcon icon={faMusic} className="pr-1 md:pr-2" />
+                                                <span className='hidden md:block'>
+                                                    Add Music
+                                                </span>
+                                            </Button></Col>
+                                        </Row>
+                                    </ListGroupItem>
+                                ))
+                            }
+                        </ListGroup>
+                    </div>
+                }
+
+                {(toggleSearchResult && playlistResult.length > 0 && searchType === 2) &&
+                    <div>
+                        <h4 className='text-white text-start mt-1'>Search Result ({playlistResult.length})</h4>
+                        <ListGroup flush className='mb-2 h-[50vh]' style={{ overflowY: "scroll", width: "100%" }}>
+                            {
+                                playlistResult.map((music, index) => (
+                                    <ListGroupItem key={index} className='text-base text-left bg-grey'>
+                                        <Row>
+                                            <Col className=''>
+                                                <Row>
+                                                    <Col xs={3} xl={2}>{music.thumbnails.medium && <img src={music.thumbnails.medium.url} />}</Col>
+                                                    <Col className="text-clip">
+                                                        <p className='mb-0 text-sm xl:text-base'>{music.title}</p>
+                                                        <p className='mb-0 text-sm xl:text-base text-gray-400'>{music.channelTitle}</p>
+                                                    </Col>
+                                                </Row>
+                                            </Col>
+
+                                            {/* <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col> */}
+                                            <Col xs={3} className="flex justify-end"><Button disabled={loading} color='success' onClick={() => { console.log(music);addMusicToQueue(music.resourceId.videoId) }}><FontAwesomeIcon icon={faMusic} className="pr-1 md:pr-2" />
                                                 <span className='hidden md:block'>
                                                     Add Music
                                                 </span>

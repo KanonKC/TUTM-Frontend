@@ -7,11 +7,12 @@ import { MdQueueMusic } from 'react-icons/md';
 import { BiArrowToRight, BiArrowToLeft } from 'react-icons/bi';
 import { GrClearOption } from 'react-icons/gr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faPlus, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Select from 'react-select'
 import { search } from '../services/search.service';
 import { getPlaylist, updatePlaylist } from '../services/playlist.service';
 import AddMusicPopup from '../components/AddMusicPopup';
+import { secondFormatting, urlFormatting } from '../services/utility.module';
 
 const PlaylistView = () => {
 
@@ -28,8 +29,8 @@ const PlaylistView = () => {
 
   const loadQueue = () => {
     getAllQueues().then(response => {
-      console.log(response.data.queues.map((music, index) => ({ ...music, index: index })))
-      setqueues(response.data.queues.map((music, index) => ({ ...music, index: index })))
+      console.log(response.data.queues)
+      setqueues(response.data.queues)
     })
 
     getPlaylist().then(response => {
@@ -40,9 +41,10 @@ const PlaylistView = () => {
 
   const addMusicToQueue = (url) => {
     let formatted_url = urlFormatting(url)
-    console.log(formatted_url)
+    console.log("FORMATTED",formatted_url)
     setloading(true)
-    addMusic(formatted_url).then(response => {
+    console.log("Begin")
+    addMusic(1,formatted_url).then(response => {
       console.log(response.data)
       setloading(false)
       setinputValue("")
@@ -58,49 +60,6 @@ const PlaylistView = () => {
     })
   }
 
-  const urlFormatting = (url) => {
-    if (url.includes('youtu.be')) {
-      let url_div = url.split("youtu.be/")
-      console.log(url_div[1])
-      return url_div[1]
-    }
-    else {
-      let url_div = url.split("?v=")
-      if (url_div.length !== 1) {
-        let query_div = url_div[1].split("&")
-        return query_div[0]
-      }
-      else {
-        return url_div[0]
-      }
-    }
-  }
-
-  const secondFormatting = (second) => {
-    let h = Math.floor(second / 3600)
-    second = second % 3600
-    let m = Math.floor(second / 60)
-    second = second % 60
-
-    let result = ""
-    if (second < 10) {
-      result = "0" + String(second)
-    }
-    else {
-      result = String(second)
-    }
-    if (h > 0 && m < 10) {
-      result = `0${m}:${result}`
-    }
-    else {
-      result = `${m}:${result}`
-    }
-    if (h > 0) {
-      result = `${h}:${result}`
-    }
-    return result
-  }
-
   useEffect(() => {
     let interval = setInterval(loadQueue, 1000)
     return () => {
@@ -112,7 +71,7 @@ const PlaylistView = () => {
     <div>
       <AddMusicPopup isOpen={isOpenPopup} setisOpen={setisOpenPopup} />
 
-      {nowPlaying && <h2 className='text-white text-center mt-10 mx-[10%]'><span className='themed-color'>Now Playing</span>: {nowPlaying.current.title}</h2>}
+      {(nowPlaying && nowPlaying.current_index >= 0) && <h2 className='text-white text-center mt-10 mx-[10%]'><span className='themed-color'>Now Playing</span>: {nowPlaying.video.title}</h2>}
 
       <div className='md:mb-2 md:mt-10'>
         <div className='mx-[5%] lg:mx-[15%] xl:mx-[20%]'>
@@ -132,7 +91,7 @@ const PlaylistView = () => {
                 </Button>
 
                 <Button className='ml-2' disabled={loading} color='primary' onClick={() => setisOpenPopup(true)}>
-                  <FontAwesomeIcon icon={faSearch} className="pr-2" />Search More
+                  <FontAwesomeIcon icon={faPlus} className="pr-2" />More Options
                 </Button>
               </div>
 
@@ -144,21 +103,21 @@ const PlaylistView = () => {
 
           <h4 className='text-white text-start mt-3'>Playlist ({queues.length})</h4>
           <ListGroup className='h-[45vh] md:h-[51.5vh] xl:h-[60vh]' style={{ overflowY: "scroll", width: "100%" }}>
-            {
+            {queues && 
               queues.map((music, index) => (
-                <ListGroupItem key={index} className='text-base text-left bg-grey ' active={nowPlaying && (index == queues.filter(music => music.queue_id === nowPlaying.current_queue_id)[0].index)}>
+                <ListGroupItem key={index} className='text-base text-left bg-grey ' active={nowPlaying && (index == nowPlaying.current_index)}>
                   <Row>
                     <Col>
                       <Row>
-                        <Col xs={3} xl={2}>{music && <img src={music.thumbnail} />}</Col>
+                        <Col xs={3} xl={2}>{music && <img src={music.video.thumbnail} />}</Col>
                         <Col className="text-clip">
-                          <p className='mb-0 text-sm xl:text-base'>{music.title}</p>
-                          <p className='mb-0 text-sm xl:text-base text-gray-400'>{music.channel_title}</p>
+                          <p className='mb-0 text-sm xl:text-base'>{music.video.title}</p>
+                          <p className='mb-0 text-sm xl:text-base text-gray-400'>{music.video.channel_title}</p>
                         </Col>
                       </Row>
                     </Col>
 
-                    <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col>
+                    <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.video.duration)}</Col>
                   </Row>
                 </ListGroupItem>
               ))
