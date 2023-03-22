@@ -23,6 +23,8 @@
     "react-select": "^5.7.0",
     "react-youtube": "^10.1.0",
     "reactstrap": "^9.1.6",
+    "sass": "^1.59.3",
+    "scss": "^0.2.4",
     "sweetalert2": "^11.7.3",
     "web-vitals": "^2.1.4"
   },

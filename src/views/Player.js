@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { addMusic, clearQueue, getAllQueues, playedIncrement, removeMusic } from '../services/queue.service';
 import { Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
@@ -13,32 +13,17 @@ import { search, searchVideo } from '../services/search.service';
 import { getPlaylist, playAlgorithm, playIndedx, playIndex, playNextVideo, playPrevVideo, updatePlaylist } from '../services/playlist.service';
 import { secondFormatting, urlFormatting } from '../services/utility.module';
 import ReactPlayer from 'react-player';
+import AddMusicPopup from '../components/AddMusicPopup';
+import { NowPlayingContext, QueueContext } from '../App';
 
 const Player = () => {
-    const [queues, setqueues] = useState([])
+    const [queues, setqueues] = useContext(QueueContext)
+    const [nowPlaying, setnowPlaying] = useContext(NowPlayingContext)
     const [loading, setloading] = useState(false)
-
-    const [Playlist, setPlaylist] = useState([])
-    const [playlist_index, setplaylist_index] = useState(0)
 
     const [inputValue, setinputValue] = useState("")
     const [searchResult, setsearchResult] = useState([])
     const [toggleSearchResult, settoggleSearchResult] = useState(true)
-
-    const [nowPlaying, setnowPlaying] = useState(null)
-    const [initialIndex,setinitialIndex] = useState(null)
-
-    const loadQueue = () => {
-        getAllQueues().then(response => {
-        //   console.log(response.data.queues)
-          setqueues(response.data.queues)
-        })
-    
-        getPlaylist().then(response => {
-        //   console.log(response.data)
-          setnowPlaying(response.data)
-        })
-      }
 
     const searchMusic = () => {
         setloading(true)
@@ -134,16 +119,12 @@ const Player = () => {
         })
     }
 
-    useEffect(() => {
-        let interval = setInterval(loadQueue, 100)
-        return () => {
-            clearInterval(interval)
-        }
-    }, [])
+    
 
     return (
         <div className="App">
-            <div className='mt-32'>
+                <h1 className='my-16 themed-color'>TURN UP THE MUSIC</h1>
+            <div className=''>
                 <div className='' style={{ width: "99%" }}>
                     <Row className='my-2'>
                         <Col xs={12} md={6}>
@@ -154,7 +135,7 @@ const Player = () => {
                                         light={true}
                                         controls
                                         playing
-                                        url={`https://www.youtube.com/watch?v=${queues.length > 0 && queues[nowPlaying.current_index].video.youtube_id}`}
+                                        url={`https://www.youtube.com/watch?v=${(queues.length > 0 && nowPlaying) && queues[nowPlaying.current_index].video.youtube_id}`}
                                         // url="https://www.twitch.tv/videos/1768582540"
                                         onReady={e => handleReady(e)}
                                         onEnded={e => handleEnd(e)}
@@ -175,31 +156,7 @@ const Player = () => {
                         </Col>
                         <Col className='w-1/2'>
                             <div className='mb-2'>
-                                <Row className='mb-2'>
-                                    <Col>
-                                        <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
-                                    </Col>
-                                    <Col xs={6} className='flex justify-center'>
-                                        <ButtonGroup className='mr-2'>
-                                            <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
-                                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
-                                            </Button>
-                                            <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
-                                                <FontAwesomeIcon icon={toggleSearchResult ? faMinus : faEye} className="pr-2" /> {
-                                                    toggleSearchResult ? "Close" : `Show (${searchResult.length})`
-                                                }
-                                            </Button>
-                                        </ButtonGroup>
-
-                                        <Button
-                                            disabled={loading || inputValue === ""}
-                                            color='success'
-                                            onClick={() => addMusicToQueue(inputValue)}
-                                        >
-                                            <FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music
-                                        </Button>
-                                    </Col>
-                                </Row>
+                                <AddMusicPopup/>
                             </div>
 
                             {(toggleSearchResult && searchResult.length > 0) &&
@@ -234,9 +191,9 @@ const Player = () => {
                             <ListGroup style={{ height: "330px", overflowY: "scroll", width: "100%" }}>
                                 {
                                     queues.map((music, index) => (
-                                        <ListGroupItem key={index} className='text-base text-left bg-grey ' active={index == nowPlaying.current_index}>
+                                        <ListGroupItem key={index} className='text-base text-left bg-grey ' active={nowPlaying && (index == nowPlaying.current_index)}>
                                             <Row>
-                                                <Col xs={10} className='cursor-pointer' onClick={() => playIndex(1,index)}>
+                                                <Col xs={10} className='cursor-pointer' onClick={() => {playIndex(1,index)}}>
                                                     <Row>
                                                         <Col xs={3} xl={2}>{music && <img src={music.video.thumbnail} />}</Col>
                                                         <Col className="text-clip">
