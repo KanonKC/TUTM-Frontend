@@ -14,6 +14,7 @@ import { getPlaylist, updatePlaylist } from '../services/playlist.service';
 import AddMusicPopup from '../components/AddMusicPopup';
 import { secondFormatting, urlFormatting } from '../services/utility.module';
 import { NowPlayingContext, QueueContext } from '../App';
+import SmartAddMusicInput from '../components/SmartAddMusicInput';
 
 const PlaylistView = () => {
 
@@ -73,6 +74,7 @@ const PlaylistView = () => {
 
         <div className='mx-[5%] lg:mx-[15%] xl:mx-[20%]'>
           <AddMusicPopup />
+          <SmartAddMusicInput/>
         </div>
 
         <div className='ml-[5%] lg:mx-[15%] xl:mx-[20%]'>
