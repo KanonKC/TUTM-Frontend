@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { addMusic, clearQueue, getAllQueues, playedIncrement, removeMusic } from '../services/queue.service';
 import { Button, ButtonGroup, Col, Form, Input, ListGroup, ListGroupItem, Row } from 'reactstrap';
@@ -9,53 +9,26 @@ import { GrClearOption } from 'react-icons/gr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faEye, faForwardStep, faMinus, faMusic, faSearch, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Select from 'react-select'
-import { search } from '../services/search.service';
-import { getPlaylist, updatePlaylist } from '../services/playlist.service';
+import { search, searchVideo } from '../services/search.service';
+import { getPlaylist, playAlgorithm, playIndedx, playIndex, playNextVideo, playPrevVideo, updatePlaylist } from '../services/playlist.service';
+import { secondFormatting, urlFormatting } from '../services/utility.module';
+import ReactPlayer from 'react-player';
+import AddMusicPopup from '../components/AddMusicPopup';
+import { NowPlayingContext, QueueContext } from '../App';
+import SmartAddMusicInput from '../components/SmartAddMusicInput';
 
 const Player = () => {
-    const [queues, setqueues] = useState([])
+    const [queues, setqueues] = useContext(QueueContext)
+    const [nowPlaying, setnowPlaying] = useContext(NowPlayingContext)
     const [loading, setloading] = useState(false)
-
-    const [Playlist, setPlaylist] = useState([])
-    const [playlist_index, setplaylist_index] = useState(0)
 
     const [inputValue, setinputValue] = useState("")
     const [searchResult, setsearchResult] = useState([])
     const [toggleSearchResult, settoggleSearchResult] = useState(true)
 
-    const [nowPlaying, setnowPlaying] = useState(null)
-    const [initialIndex,setinitialIndex] = useState(null)
-
-    const loadQueue = () => {
-        getAllQueues().then(response => {
-            // console.log(response.data.queues.map((music,index) => ({played_count: music.played_count,index: index})))
-            setqueues(response.data.queues.map((music, index) => ({ ...music, index: index })))
-            setPlaylist(response.data.queues.map(music => music.url))
-        })
-
-        getPlaylist().then(response => {
-            setnowPlaying(response.data)    
-            // setplaylist_index(response.data.current_queue_id)
-        })
-    }
-
-    const selectNextMusic = () => {
-        const current_id = queues.filter(music => music.url === Playlist[playlist_index])[0].queue_id
-        const no_current = queues.filter(music => music.queue_id !== current_id)
-        const least_played = Math.min(...no_current.map(music => music.played_count))
-        console.log('Least played', current_id, no_current, least_played)
-        const first_group = no_current.filter(music => music.played_count === least_played)
-
-        const first_next = first_group.filter(music => music.queue_id > current_id)
-        if (first_next[0]) {
-            return first_next[0].index
-        }
-        return first_group[0].index
-    }
-
     const searchMusic = () => {
         setloading(true)
-        search(inputValue).then(response => {
+        searchVideo(inputValue).then(response => {
             setloading(false)
             setsearchResult(response.data.result)
         }).catch(err => {
@@ -64,57 +37,28 @@ const Player = () => {
     }
 
     const handleReady = (e) => {
-        setTimeout(() => {
-            e.target.playVideo();
-        }, 1000)
+        // setTimeout(() => {
+        //     console.log("Hello")
+        //     e.target.playVideo();
+        // }, 1000)
+        console.log("Ready")
     }
 
     const handleEnd = (e) => {
-
-        let queue_id = queues.filter((music, index) => index === playlist_index)[0].queue_id
-        playedIncrement(queue_id).then(response => {
-            return loadQueue()
-        }).then(response => {
-            let nm = selectNextMusic()
-            console.log(nm)
-            setplaylist_index(nm)
+        playedIncrement(queues[nowPlaying.current_index].queue_id).then(response => {
+            console.log(response)
+            return playAlgorithm(1)
         })
-        // if(!playLoop){
-        //     setplaylist_index(playlist_index + 1)
-        // }
-        // else{
-        //     setplaylist_index((playlist_index + 1) % Playlist.length)
-        // }
+        // let queue_id = queues.filter((music, index) => index === playlist_index)[0].queue_id
+        // playedIncrement(queue_id).then(response => {
+        //     return loadQueue()
+        // }).then(response => {
+        //     let nm = selectNextMusic()
+        //     console.log(nm)
+        //     setplaylist_index(nm)
+        // })
+        console.log("End")
     }
-
-    // useEffect(() => {
-    //     console.log("Considered Loop",playlist_index,Playlist.length)
-    //     if(playlist_index == 0 && Playlist.length == 0){
-    //         return
-    //     }
-    //     if(!playLoop && ((playlist_index) >= Playlist.length)){
-    //         setplayLoop(true)
-    //     }
-    //     else if(playLoop && ((index_mode.last) < Playlist.length)){
-    //         setplayLoop(false)
-    //     }
-    // },[playlist_index])
-
-    // useEffect(() => {
-    //     console.log("Switch Mode")
-    //     if(playLoop){
-    //         setindex_mode({...index_mode, last: playlist_index})
-    //         setplaylist_index(index_mode.loop)
-    //     }
-    //     else{
-    //         setindex_mode({...index_mode, loop: playlist_index})
-    //         setplaylist_index(index_mode.last)
-    //     }
-    // },[playLoop])
-
-    // useEffect(() => {
-    //     console.log(index_mode,playLoop,playlist_index)
-    // },[index_mode,playLoop,playlist_index])
 
     const addMusicToQueue = (url) => {
         let formatted_url = urlFormatting(url)
@@ -136,48 +80,6 @@ const Player = () => {
         })
     }
 
-    const urlFormatting = (url) => {
-        if (url.includes('youtu.be')) {
-            let url_div = url.split("youtu.be/")
-            console.log(url_div[1])
-            return url_div[1]
-        }
-        else {
-            let url_div = url.split("?v=")
-            if (url_div.length !== 1) {
-                let query_div = url_div[1].split("&")
-                return query_div[0]
-            }
-            else {
-                return url_div[0]
-            }
-        }
-    }
-
-    const secondFormatting = (second) => {
-        let h = Math.floor(second / 3600)
-        second = second % 3600
-        let m = Math.floor(second / 60)
-        second = second % 60
-
-        let result = ""
-        if (second < 10) {
-            result = "0" + String(second)
-        }
-        else {
-            result = String(second)
-        }
-        if (h > 0 && m < 10) {
-            result = `0${m}:${result}`
-        }
-        else {
-            result = `${m}:${result}`
-        }
-        if (h > 0) {
-            result = `${h}:${result}`
-        }
-        return result
-    }
 
     const handleClear = () => {
         // setplaylist_index(0)
@@ -203,7 +105,7 @@ const Player = () => {
         })
     }
 
-    const confirmationRemoveMusic = (queue_id, index) => {
+    const confirmationRemoveMusic = (queue_id) => {
         Swal.fire({
             title: 'Remove Warning',
             text: 'Are you sure that you want to remove this music?',
@@ -213,71 +115,39 @@ const Player = () => {
             confirmButtonText: 'Yes'
         }).then((result) => {
             if (result.isConfirmed) {
-                handleRemoveMusic(queue_id, index)
+                removeMusic(queue_id)
             }
         })
     }
 
-    const handleRemoveMusic = (queue_id, index) => {
-        removeMusic(queue_id).then(() => {
-            console.log(index, playlist_index)
-            if (index < playlist_index) {
-                setplaylist_index(playlist_index - 1)
-            }
-            else {
-                setPlaylist(playlist_index)
-            }
-        })
-    }
-
-    useEffect(() => {
-        getPlaylist().then(response => {
-            if(queues.length === 0){
-                return
-            }
-            
-            setplaylist_index(queues.filter(music => music.queue_id === response.data.current_queue_id)[0].index)
-        })
-    },[queues])
-
-    useEffect(() => {
-        let interval = setInterval(loadQueue, 1000)
-        return () => {
-            clearInterval(interval)
-        }
-    }, [])
-
-    useEffect(() => {
-        let filtered = queues.filter((v, i) => i === playlist_index)
-        if(filtered.length === 0){
-            return
-        }
-        updatePlaylist(1, {
-            current_queue_id: filtered[0].queue_id
-        })
-    }, [playlist_index])
+    
 
     return (
         <div className="App">
-            <div className='mt-32'>
+                <h1 className='my-16 themed-color'>TURN UP THE MUSIC</h1>
+            <div className=''>
                 <div className='' style={{ width: "99%" }}>
                     <Row className='my-2'>
                         <Col xs={12} md={6}>
                             {/* {nowPlaying && <h4 className='text-white'>Now Playing: {nowPlaying.current.title}</h4>} */}
                             <div className='flex justify-end'>  
                                 <div className='themed-border'>
-                                    <YouTube
-                                        videoId={Playlist[playlist_index]}
+                                    <ReactPlayer
+                                        light={true}
+                                        controls
+                                        playing
+                                        url={`https://www.youtube.com/watch?v=${(queues.length > 0 && nowPlaying) && queues[nowPlaying.current_index].video.youtube_id}`}
+                                        // url="https://www.twitch.tv/videos/1768582540"
                                         onReady={e => handleReady(e)}
-                                        onEnd={e => handleEnd(e)}
+                                        onEnded={e => handleEnd(e)}
                                     />
                                 </div>
                             </div>
                             <div className='flex justify-end mt-3'>
-                                <Button color='light' onClick={() => { setplaylist_index((((playlist_index - 1) % Playlist.length) + Playlist.length) % Playlist.length) }}>
+                                <Button color='light' onClick={() => playPrevVideo() }>
                                     <FontAwesomeIcon icon={faBackwardStep} className="mr-0  " /> Prev
                                 </Button>
-                                <Button color='light' className='mx-2' onClick={() => { setplaylist_index((playlist_index + 1) % Playlist.length) }}>
+                                <Button color='light' className='mx-2' onClick={() => playNextVideo()}>
                                     Next <FontAwesomeIcon icon={faForwardStep} className="ml-0" />
                                 </Button>
                                 <Button className='text-white' disabled={loading} onClick={handleClear} color="danger">
@@ -287,31 +157,8 @@ const Player = () => {
                         </Col>
                         <Col className='w-1/2'>
                             <div className='mb-2'>
-                                <Row className='mb-2'>
-                                    <Col>
-                                        <Input placeholder='Add your music by search or paste URL here ...' value={inputValue} onChange={e => setinputValue(e.target.value)} />
-                                    </Col>
-                                    <Col xs={6} className='flex justify-center'>
-                                        <ButtonGroup className='mr-2'>
-                                            <Button disabled={loading || inputValue === ""} color='primary' onClick={() => searchMusic()}>
-                                                <FontAwesomeIcon icon={faSearch} className="pr-2" />Search
-                                            </Button>
-                                            <Button disabled={loading || searchResult.length == 0} color='secondary' onClick={() => settoggleSearchResult(!toggleSearchResult)}>
-                                                <FontAwesomeIcon icon={toggleSearchResult ? faMinus : faEye} className="pr-2" /> {
-                                                    toggleSearchResult ? "Close" : `Show (${searchResult.length})`
-                                                }
-                                            </Button>
-                                        </ButtonGroup>
-
-                                        <Button
-                                            disabled={loading || inputValue === ""}
-                                            color='success'
-                                            onClick={() => addMusicToQueue(inputValue)}
-                                        >
-                                            <FontAwesomeIcon icon={faMusic} className="pr-2" />Add Music
-                                        </Button>
-                                    </Col>
-                                </Row>
+                                {/* <AddMusicPopup/> */}
+                                <SmartAddMusicInput/>
                             </div>
 
                             {(toggleSearchResult && searchResult.length > 0) &&
@@ -346,20 +193,20 @@ const Player = () => {
                             <ListGroup style={{ height: "330px", overflowY: "scroll", width: "100%" }}>
                                 {
                                     queues.map((music, index) => (
-                                        <ListGroupItem key={index} className='text-base text-left bg-grey ' active={index == playlist_index}>
+                                        <ListGroupItem key={index} className='text-base text-left bg-grey ' active={nowPlaying && (index == nowPlaying.current_index)}>
                                             <Row>
-                                                <Col xs={10} className='cursor-pointer' onClick={() => setplaylist_index(index)}>
+                                                <Col xs={10} className='cursor-pointer' onClick={() => {playIndex(1,index)}}>
                                                     <Row>
-                                                        <Col xs={3} xl={2}>{music && <img src={music.thumbnail} />}</Col>
+                                                        <Col xs={3} xl={2}>{music && <img src={music.video.thumbnail} />}</Col>
                                                         <Col className="text-clip">
-                                                            <p className='mb-0'>{music.title}</p>
-                                                            <p className='mb-0 text-gray-400'>{music.channel_title}</p>
+                                                            <p className='mb-0'>{music.video.title}</p>
+                                                            <p className='mb-0 text-gray-400'>{music.video.channel_title}</p>
                                                         </Col>
                                                     </Row>
                                                 </Col>
 
-                                                <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.duration)}</Col>
-                                                <Col xs={1}><Button color='danger' onClick={() => { confirmationRemoveMusic(music.queue_id, index) }}><FontAwesomeIcon icon={faXmark} /></Button></Col>
+                                                <Col xs={1} className='flex justify-end cursor-default'>{secondFormatting(music.video.duration)}</Col>
+                                                <Col xs={1}><Button color='danger' onClick={() => { confirmationRemoveMusic(music.queue_id) }}><FontAwesomeIcon icon={faXmark} /></Button></Col>
                                             </Row>
                                         </ListGroupItem>
 
