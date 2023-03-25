@@ -1,4 +1,4 @@
-import { faCaretDown, faCaretUp, faCross, faMusic, faX } from '@fortawesome/free-solid-svg-icons'
+import { faCaretDown, faCaretUp, faMusic } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from 'react'
 import { Button, Col, Input, ListGroup, ListGroupItem, Row } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -6,7 +6,6 @@ import { searchRecognizer } from '../services/utility.module';
 import { addMusic } from '../services/queue.service';
 import { searchPlaylist, searchVideo } from '../services/search.service';
 import { toastSuccess } from '../services/tostify.module';
-import { toast } from 'react-toastify';
 
 const SmartAddMusicInput = () => {
 
@@ -51,6 +50,9 @@ const SmartAddMusicInput = () => {
                     settoggleSearchResult(true)
                 })
                 break
+
+            default:
+                break
         }
     }
 
@@ -61,7 +63,6 @@ const SmartAddMusicInput = () => {
             setloading(false)
             setinputValue("")
             toastSuccess(`${response.data.video.title} has been added to Queue!`)
-            // toastSuccess(<h1></h1>)
         })
     }
 
@@ -104,7 +105,7 @@ const SmartAddMusicInput = () => {
                                     <Row>
                                         <Col className=''>
                                             <Row>
-                                                <Col xs={3} xl={2}>{music && <img src={music.thumbnails.medium.url} />}</Col>
+                                                <Col xs={3} xl={2}>{music && <img src={music.thumbnails.medium.url} alt="Thumbnail"/>}</Col>
                                                 <Col className="text-clip">
                                                     <p className='mb-0 text-sm xl:text-base'>{music.title}</p>
                                                     <p className='mb-0 text-sm xl:text-base text-gray-400'>{music.channelTitle}</p>

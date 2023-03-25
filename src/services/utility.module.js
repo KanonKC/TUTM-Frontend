@@ -1,10 +1,6 @@
-import { getPlaylist } from "./playlist.service"
-import { getAllQueues } from "./queue.service"
-
 export function urlFormatting(url) {
     if (url.includes('youtu.be')) {
         let url_div = url.split("youtu.be/")
-        return(url_div[1])
         return url_div[1]
     }
     else {
