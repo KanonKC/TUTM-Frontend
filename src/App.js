@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import './App.css';
 import { getPlaylist } from './services/playlist.service';
@@ -20,17 +21,20 @@ function App() {
             return getPlaylist()
         }).then(response => {
             setnowPlaying(response.data)
-        }).catch(err => {
-            Swal.fire("Playlist Not Found","","error")
+        }).catch(({ response }) => {
+            if (!response) {
+                Swal.fire("Connection Error", "Please check your internet connection, and try again.", "error")
+            }
+            else if (response.status === 404) {
+                Swal.fire("Playlist Not Found", "The playlist doesn't exist, Please create a new one.", "error")
+            }
         })
-
-        
     }
 
     let interval;
     useEffect(() => {
         interval = setInterval(loadQueue, 1000)
-    
+
         return () => {
             clearInterval(interval)
         }
@@ -43,6 +47,19 @@ function App() {
                     <Views />
                 </QueueContext.Provider>
             </NowPlayingContext.Provider>
+
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
         </div>
     )
 }
