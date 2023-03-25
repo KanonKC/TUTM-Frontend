@@ -73,14 +73,14 @@ const PlaylistView = () => {
       <div className='md:mb-2 md:mt-10'>
 
         <div className='mx-[5%] lg:mx-[15%] xl:mx-[20%]'>
-          <AddMusicPopup />
+          {/* <AddMusicPopup /> */}
           <SmartAddMusicInput/>
         </div>
 
         <div className='ml-[5%] lg:mx-[15%] xl:mx-[20%]'>
 
           <h4 className='text-white text-start mt-3'>Playlist ({queues.length})</h4>
-          <ListGroup className='h-[45vh] md:h-[51.5vh] xl:h-[60vh]' style={{ overflowY: "scroll", width: "100%" }}>
+          <ListGroup className='h-[45vh] md:h-[50vh] xl:h-[60vh]' style={{ overflowY: "scroll", width: "100%" }}>
             {queues &&
               queues.map((music, index) => (
                 <ListGroupItem key={index} className='text-base text-left bg-grey ' active={nowPlaying && (index == nowPlaying.current_index)}>

@@ -15,6 +15,7 @@ import { secondFormatting, urlFormatting } from '../services/utility.module';
 import ReactPlayer from 'react-player';
 import AddMusicPopup from '../components/AddMusicPopup';
 import { NowPlayingContext, QueueContext } from '../App';
+import SmartAddMusicInput from '../components/SmartAddMusicInput';
 
 const Player = () => {
     const [queues, setqueues] = useContext(QueueContext)
@@ -156,7 +157,8 @@ const Player = () => {
                         </Col>
                         <Col className='w-1/2'>
                             <div className='mb-2'>
-                                <AddMusicPopup/>
+                                {/* <AddMusicPopup/> */}
+                                <SmartAddMusicInput/>
                             </div>
 
                             {(toggleSearchResult && searchResult.length > 0) &&

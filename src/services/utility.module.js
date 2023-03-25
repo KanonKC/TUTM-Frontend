@@ -4,7 +4,7 @@ import { getAllQueues } from "./queue.service"
 export function urlFormatting(url) {
     if (url.includes('youtu.be')) {
         let url_div = url.split("youtu.be/")
-        console.log(url_div[1])
+        return(url_div[1])
         return url_div[1]
     }
     else {
@@ -56,4 +56,35 @@ export function secondFormatting(second) {
         result = `${h}:${result}`
     }
     return result
+}
+
+export function searchRecognizer(input){
+    let result
+    if(input.includes('youtu.be')){
+        return(['VIDEO',input.split('/')[3]])
+    }
+    else if(input.includes('list=')){
+        const videoReg = /list=(.*?)&|list=(.*?)/
+        result = videoReg.exec(input)[0]
+        if(result[result.length-1] === '&'){
+            return(['PLAYLIST',result.slice(5,-1)])
+        }
+        else{
+            return(['PLAYLIST',result.slice(5)])
+        }
+    }
+    else if(input.includes('v=')){
+        const videoReg = /v=.*&|v=.*/
+        result = videoReg.exec(input)[0]
+        // return(result[0],result[0][result[0].length-1])
+        if(result[result.length-1] === '&'){
+            return(['VIDEO',result.slice(2,-1)])
+        }
+        else{
+            return(['VIDEO',result.slice(2)])
+        }
+    }
+    else{
+        return(['SEARCH',input])
+    }
 }
