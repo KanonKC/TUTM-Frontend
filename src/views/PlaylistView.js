@@ -1,10 +1,13 @@
 import { useContext } from 'react';
-import { Col, ListGroup, ListGroupItem, Row } from 'reactstrap';
+import { Button, Col, ListGroup, ListGroupItem, Row } from 'reactstrap';
 import { secondFormatting } from '../services/utility.module';
 import { NowPlayingContext, QueueContext } from '../App';
 import SmartAddMusicInput from '../components/SmartAddMusicInput';
+import { useNavigate } from 'react-router-dom';
 
 const PlaylistView = () => {
+
+  const nevigate = useNavigate()
 
   const [queues] = useContext(QueueContext)
   const [nowPlaying] = useContext(NowPlayingContext)
@@ -46,6 +49,13 @@ const PlaylistView = () => {
               ))
             }
           </ListGroup>
+
+            <div className='flex'>
+
+          <Button className='mx-auto mt-3' onClick={() => nevigate("./player")}>
+            Go To Player
+          </Button>
+            </div>
 
         </div>
       </div>
