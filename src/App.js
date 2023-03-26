@@ -5,7 +5,6 @@ import './App.css';
 import { getPlaylist } from './services/playlist.service';
 import { getAllQueues } from './services/queue.service';
 import Views from './views';
-import Player from './views/Player';
 
 export const QueueContext = createContext()
 export const NowPlayingContext = createContext()
