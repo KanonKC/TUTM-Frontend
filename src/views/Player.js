@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep,  faForwardStep, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { playAlgorithm, playIndex, playNextVideo, playPrevVideo} from '../services/playlist.service';
-import { secondFormatting } from '../services/utility.module';
+import { secondFormatting } from '../modules/utility.module';
 import ReactPlayer from 'react-player';
 import { NowPlayingContext, QueueContext } from '../App';
 import SmartAddMusicInput from '../components/SmartAddMusicInput';

@@ -2,10 +2,10 @@ import { faCaretDown, faCaretUp, faMusic } from '@fortawesome/free-solid-svg-ico
 import React, { useEffect, useState } from 'react'
 import { Button, Col, Input, ListGroup, ListGroupItem, Row } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { searchRecognizer } from '../services/utility.module';
+import { searchRecognizer } from '../modules/utility.module';
 import { addMusic } from '../services/queue.service';
 import { searchPlaylist, searchVideo } from '../services/search.service';
-import { toastSuccess } from '../services/tostify.module';
+import { toastSuccess } from '../modules/tostify.module';
 
 const SmartAddMusicInput = () => {
 

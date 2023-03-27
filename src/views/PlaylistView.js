@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Button, Col, ListGroup, ListGroupItem, Row } from 'reactstrap';
-import { secondFormatting } from '../services/utility.module';
+import { secondFormatting } from '../modules/utility.module';
 import { NowPlayingContext, QueueContext } from '../App';
 import SmartAddMusicInput from '../components/SmartAddMusicInput';
 import { useNavigate } from 'react-router-dom';

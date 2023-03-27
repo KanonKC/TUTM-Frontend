@@ -15,7 +15,7 @@ export default AddMusicPopup
 // import { addMusic, clearQueue, getAllQueues, playedIncrement, removeMusic } from '../services/queue.service';
 // import { getPlaylist, updatePlaylist } from '../services/playlist.service';
 // import { search, searchPlaylist, searchVideo } from '../services/search.service';
-// import { playlistUrlFormatting } from '../services/utility.module';
+// import { playlistUrlFormatting } from '../modules/utility.module';
 // import { NowPlayingContext, QueueContext } from '../App';
 
 // const AddMusicPopup = () => {
