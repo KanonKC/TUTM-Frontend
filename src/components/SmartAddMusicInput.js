@@ -98,7 +98,7 @@ const SmartAddMusicInput = () => {
             {startSearch && <h4 onClick={() => settoggleSearchResult(!toggleSearchResult)} className='text-white text-start mt-1 cursor-pointer'>Search Result ({searchResult.length}) <FontAwesomeIcon icon={!toggleSearchResult ? faCaretDown : faCaretUp} /></h4>}
             {(toggleSearchResult && searchResult.length > 0 && inputResult[0] !== "VIDEO") &&
                 <div>
-                    <ListGroup flush className='mb-2 h-[50vh]' style={{ overflowY: "scroll", width: "100%" }}>
+                    <ListGroup className='h-[45vh] md:h-[50vh] xl:h-[55vh] lg:w-[100%] md:w-[95%] lg:w-[100%]' style={{ overflowY: "scroll" }}>
                         {
                             searchResult.map((music, index) => (
                                 <ListGroupItem key={index} className='text-base text-left bg-grey'>

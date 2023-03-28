@@ -56,7 +56,7 @@ const Player = () => {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            confirmButtonText: 'Yes'
+            confirmButtonText: 'Yes',
         }).then((result) => {
             if (result.isConfirmed) {
                 removeMusic(queue_id)
