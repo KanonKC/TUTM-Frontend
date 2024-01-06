@@ -31,14 +31,9 @@ function App() {
         })
     }
 
-    let interval;
     useEffect(() => {
-        interval = setInterval(loadQueue, 1000)
-
-        return () => {
-            clearInterval(interval)
-        }
-    }, [])
+        loadQueue()
+    })
 
     return (
         <div>
