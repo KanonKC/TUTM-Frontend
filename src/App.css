@@ -15,7 +15,7 @@ body {
 
 .themed-border {
   background: linear-gradient(#282c34, #282c34) 50% 50%/calc(100% - 12px) calc(100% - 12px) no-repeat,
-            linear-gradient(343deg, transparent 0%, rgba(255,0,250,0.6) 0%, #00ffeb 0%, rgba(220, 18, 219, 0.661) 100%);
+            linear-gradient(343deg, transparent 0%, #ff00fa99 0%, #00ffeb 0%, rgba(220, 18, 219, 0.661) 100%);
   border-radius: 0px;
   padding: 15px;
   box-sizing: border-box;
