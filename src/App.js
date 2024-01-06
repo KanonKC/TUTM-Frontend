@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import './App.css';
-import { getPlaylist } from './services/playlist.service';
+import { createPlaylist, getPlaylist } from './services/playlist.service';
 import { getAllQueues } from './services/queue.service';
 import Views from './views';
 
@@ -25,7 +25,8 @@ function App() {
                 Swal.fire("Connection Error", "Please check your internet connection, and try again.", "error")
             }
             else if (response.status === 404) {
-                Swal.fire("Playlist Not Found", "The playlist doesn't exist, Please create a new one.", "error")
+                // Swal.fire("Playlist Not Found", "The playlist doesn't exist, Please create a new one.", "error")
+                return createPlaylist()
             }
         })
     }

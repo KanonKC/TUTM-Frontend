@@ -1,6 +1,10 @@
 import axios from "axios";
 import { BACKEND_URL } from "./constant.service";
 
+export async function createPlaylist(){
+    return axios.post(`${BACKEND_URL}/api/playlists`)
+}
+
 export async function getPlaylist(playlist_id=1){
     return axios.get(`${BACKEND_URL}/api/playlists/${playlist_id}`)
 }
